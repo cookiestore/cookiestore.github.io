@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>REBECCA · Birthday Live</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07060a;
+      --ink: #f4f0f8;
+      --mute: #9a92a8;
+      --hot: #ff2d6f;
+      --volt: #5ef0ff;
+      --gold: #ffc857;
+      --violet: #a855f7;
+      --fog-a: rgba(255, 45, 111, 0.22);
+      --fog-b: rgba(94, 240, 255, 0.08);
+      --fog-c: rgba(168, 85, 247, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      overflow-x: hidden;
+      min-height: 100dvh;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      z-index: 10;
+    }
+    .screen.active { display: flex; }
+
+    /* ===== GATE (decoy birthday wall) ===== */
+    #gate {
+      z-index: 25;
+      overflow: hidden;
+      padding: 0;
+      justify-content: stretch;
+      align-items: stretch;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 0%, #3a1840 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, #1a2040 0%, transparent 50%),
+        #120816;
+    }
+    .gate-frame {
+      width: 100%;
+      height: 100%;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .gate-header {
+      flex: 0 0 auto;
+      text-align: center;
+      padding: 1.35rem 1.25rem .85rem;
+    }
+    .gate-header .g-eyebrow {
+      font-size: .65rem;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: #e8a0c0;
+      margin-bottom: .45rem;
+    }
+    .gate-header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.2rem, 9vw, 3.6rem);
+      letter-spacing: .12em;
+      background: linear-gradient(120deg, #fff, #ff9ec8 50%, #ffd6a5);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .gate-header .g-sub {
+      margin-top: .45rem;
+      color: #b89aab;
+      font-size: .85rem;
+      font-weight: 300;
+    }
+    .gate-field {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: min(720px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .7rem;
+      align-content: start;
+      padding: .25rem 1.1rem 1rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    @media (min-width: 560px) {
+      .gate-field {
+        grid-template-columns: 1fr 1fr;
+        gap: .85rem 1rem;
+        padding: .35rem 1.5rem 1.1rem;
+      }
+    }
+    .gate-wish {
+      width: 100%;
+      box-sizing: border-box;
+      padding: .7rem .85rem;
+      font-size: clamp(.86rem, 2.6vw, .98rem);
+      line-height: 1.7;
+      color: rgba(255, 240, 248, .88);
+      background: rgba(255, 255, 255, .045);
+      border: 1px solid rgba(255, 182, 210, .18);
+      border-radius: 4px;
+      user-select: none;
+      pointer-events: none;
+      transition: border-color .2s, background .2s;
+    }
+    .gate-wish:hover {
+      background: rgba(255, 255, 255, .07);
+      border-color: rgba(255, 182, 210, .4);
+    }
+    .gate-ch {
+      display: inline-block;
+      cursor: pointer;
+      pointer-events: auto;
+      color: inherit;
+      padding: .1em .05em;
+      border-radius: 2px;
+      line-height: 1.45;
+      transition: background .15s, color .15s;
+    }
+    .gate-ch:hover {
+      background: rgba(255, 255, 255, .14);
+    }
+    .gate-ch.picked {
+      background: rgba(255, 158, 200, .28);
+      color: #fff;
+    }
+    .gate-footer {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .7rem;
+      padding: .9rem 1.25rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid rgba(255, 182, 210, .12);
+      background: rgba(12, 6, 16, .88);
+      backdrop-filter: blur(8px);
+    }
+    .gate-slots {
+      display: flex;
+      gap: .7rem;
+    }
+    .gate-slot {
+      width: 2.6rem;
+      height: 2.6rem;
+      display: grid;
+      place-items: center;
+      font-size: 1.15rem;
+      color: rgba(255, 255, 255, .25);
+      border: 1px dashed rgba(255, 182, 210, .45);
+      background: rgba(0, 0, 0, .35);
+      transition: color .2s, border-color .2s, background .2s, box-shadow .2s;
+    }
+    .gate-slot.on {
+      color: #fff;
+      border-style: solid;
+      border-color: rgba(255, 158, 200, .9);
+      background: rgba(255, 45, 111, .25);
+      box-shadow: 0 0 16px rgba(255, 45, 111, .35);
+    }
+    .gate-hint {
+      font-size: .72rem;
+      color: rgba(184, 154, 171, .8);
+      letter-spacing: .08em;
+    }
+    #gate.unlocking {
+      animation: gateOut .7s ease forwards;
+    }
+    @keyframes gateOut {
+      to { opacity: 0; transform: scale(1.03); filter: blur(6px); }
+    }
+
+    /* ===== BOOT ===== */
+    #boot {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 100%, #2a0a22 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 20% 20%, #0a2030 0%, transparent 50%),
+        var(--bg);
+    }
+    #boot .pulse {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--hot);
+      box-shadow: 0 0 24px var(--hot);
+      animation: heartbeat 1.1s ease-in-out infinite;
+      margin-bottom: 1.5rem;
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); opacity: .7; }
+      15% { transform: scale(1.35); opacity: 1; }
+      30% { transform: scale(1); opacity: .7; }
+      45% { transform: scale(1.2); opacity: 1; }
+    }
+    #boot .brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 14vw, 6.5rem);
+      letter-spacing: .12em;
+      line-height: .9;
+      background: linear-gradient(120deg, #fff 20%, var(--hot) 50%, var(--volt) 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+    }
+    #boot .sub {
+      margin-top: 1rem;
+      color: var(--mute);
+      letter-spacing: .2em;
+      font-size: .72rem;
+      text-align: center;
+      max-width: 22rem;
+      line-height: 1.7;
+    }
+    #countdown {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 20vw, 9rem);
+      color: var(--ink);
+      margin: 2rem 0 1.5rem;
+      text-shadow: 0 0 40px rgba(255, 45, 111, .5);
+      min-height: 1.1em;
+      transition: opacity .4s;
+    }
+    .cta {
+      position: relative;
+      padding: .9rem 2.2rem;
+      border: 1px solid rgba(255, 255, 255, .25);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      font-size: .75rem;
+      font-weight: 600;
+      overflow: hidden;
+      transition: border-color .25s, box-shadow .25s, transform .2s;
+    }
+    .cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .12) 50%, transparent 70%);
+      transform: translateX(-120%);
+      transition: transform .5s;
+    }
+    .cta:hover {
+      border-color: var(--hot);
+      box-shadow: 0 0 30px rgba(255, 45, 111, .35);
+      transform: translateY(-2px);
+    }
+    .cta:hover::before { transform: translateX(120%); }
+    .cta.primary {
+      background: linear-gradient(135deg, var(--hot), #c026d3);
+      border: none;
+      box-shadow: 0 8px 32px rgba(255, 45, 111, .35);
+    }
+    .hint {
+      margin-top: 1.25rem;
+      font-size: .75rem;
+      color: var(--mute);
+      opacity: 0;
+      transition: opacity .4s;
+      text-align: center;
+    }
+    .hint.show { opacity: 1; }
+
+    /* ===== STAGE ===== */
+    #stage {
+      justify-content: flex-start;
+      padding: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--bg);
+    }
+    .fog {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 90% 40% at 50% 110%, var(--fog-a), transparent 60%),
+        radial-gradient(ellipse 50% 30% at 10% 40%, var(--fog-b), transparent 50%),
+        radial-gradient(ellipse 40% 25% at 90% 30%, var(--fog-c), transparent 50%);
+      transition: background .6s ease;
+    }
+    .beams {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      opacity: .55;
+    }
+    .beam {
+      position: absolute;
+      bottom: -10%;
+      width: 2px;
+      height: 120%;
+      background: linear-gradient(to top, transparent, var(--beam, var(--hot)));
+      transform-origin: bottom center;
+      filter: blur(1px);
+      animation: sweep 8s ease-in-out infinite;
+    }
+    .beam:nth-child(1) { left: 18%; --beam: var(--hot); transform: rotate(-18deg); }
+    .beam:nth-child(2) { left: 50%; --beam: var(--volt); transform: rotate(0deg); animation-delay: -2s; opacity: .7; }
+    .beam:nth-child(3) { left: 82%; --beam: var(--violet); transform: rotate(18deg); animation-delay: -4s; }
+    @keyframes sweep {
+      0%, 100% { opacity: .25; filter: blur(2px); }
+      50% { opacity: .85; filter: blur(0); }
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .85rem 1.1rem;
+      backdrop-filter: blur(12px);
+      background: rgba(7, 6, 10, .65);
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+    }
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: .18em;
+      font-size: 1.15rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .logo span { color: var(--hot); }
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .65rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+    .dots { display: flex; gap: .35rem; }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255, 255, 255, .15);
+      transition: background .3s, box-shadow .3s, transform .3s;
+    }
+    .dot.on {
+      background: var(--volt);
+      box-shadow: 0 0 10px var(--volt);
+      transform: scale(1.15);
+    }
+
+    .stage-inner {
+      position: relative;
+      z-index: 1;
+      width: min(920px, 100%);
+      margin: 0 auto;
+      padding: 1.5rem 1.1rem 5rem;
+    }
+    .hero-block {
+      text-align: center;
+      padding: 1.5rem 0 2rem;
+    }
+    .eyebrow {
+      font-size: .7rem;
+      letter-spacing: .4em;
+      text-transform: uppercase;
+      color: var(--volt);
+      margin-bottom: .75rem;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.8rem, 12vw, 5.5rem);
+      letter-spacing: .08em;
+      line-height: .92;
+    }
+    .hero-title em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--hot), var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-line {
+      margin-top: .85rem;
+      color: var(--mute);
+      font-weight: 300;
+      max-width: 30rem;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.55;
+    }
+    #heroName {
+      color: var(--ink);
+      font-weight: 600;
+      transition: opacity .22s ease;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+    .nav-tabs button {
+      padding: .45rem .85rem;
+      font-size: .65rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 255, 255, .12);
+      color: var(--mute);
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .nav-tabs button:hover,
+    .nav-tabs button.on {
+      color: var(--ink);
+      border-color: var(--hot);
+      background: rgba(255, 45, 111, .12);
+    }
+
+    .section { display: none; animation: fadeUp .35s ease; }
+    .section.on { display: block; }
+
+    .panel {
+      margin-top: .25rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, .08);
+      background: linear-gradient(160deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .015));
+      position: relative;
+    }
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--hot), var(--volt), transparent);
+      opacity: .5;
+    }
+    .panel h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: .14em;
+      font-size: 1.35rem;
+      margin-bottom: .35rem;
+    }
+    .panel p.desc {
+      color: var(--mute);
+      font-size: .85rem;
+      margin-bottom: 1.1rem;
+      line-height: 1.5;
+    }
+
+    /* Lights */
+    .lights {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .65rem;
+    }
+    @media (max-width: 520px) {
+      .lights { grid-template-columns: repeat(2, 1fr); }
+    }
+    .light {
+      aspect-ratio: 1;
+      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(0, 0, 0, .35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      transition: transform .2s, border-color .25s, box-shadow .3s, background .3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .light .bulb {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255, 255, 255, .12);
+      transition: background .3s, box-shadow .3s;
+    }
+    .light .tag {
+      font-size: .65rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+    .light:hover { transform: translateY(-3px); border-color: rgba(255, 255, 255, .25); }
+    .light.lit .bulb {
+      background: var(--c, var(--hot));
+      box-shadow: 0 0 22px var(--c, var(--hot));
+    }
+    .light.lit {
+      border-color: color-mix(in srgb, var(--c, var(--hot)) 50%, transparent);
+      box-shadow: inset 0 0 30px color-mix(in srgb, var(--c, var(--hot)) 20%, transparent);
+    }
+    .light.lit .tag { color: var(--ink); }
+    .light.lit::after {
+      content: 'ON';
+      position: absolute;
+      bottom: .4rem;
+      font-size: .55rem;
+      letter-spacing: .2em;
+      color: var(--c, var(--hot));
+      opacity: .8;
+    }
+
+    /* Looks */
+    /* Vanity */
+    .vanity {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      justify-content: center;
+    }
+    .drawer {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      border: 1px dashed rgba(255, 255, 255, .25);
+      display: grid;
+      place-items: center;
+      font-size: 1.35rem;
+      transition: transform .2s, border-color .25s, box-shadow .3s, background .3s;
+      background: rgba(255, 255, 255, .03);
+    }
+    .drawer:hover { transform: scale(1.08); }
+    .drawer.open {
+      border-style: solid;
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(255, 200, 87, .3);
+      background: rgba(255, 200, 87, .08);
+    }
+
+    /* Rhythm */
+    .rhythm-area {
+      text-align: center;
+      padding: .5rem 0 0;
+    }
+    .beat-track {
+      display: flex;
+      justify-content: center;
+      gap: .75rem;
+      margin: 1.25rem 0;
+      min-height: 64px;
+      align-items: flex-end;
+    }
+    .pad {
+      width: 56px; height: 56px;
+      border: 1px solid rgba(255, 255, 255, .2);
+      background: rgba(255, 255, 255, .04);
+      transition: transform .1s, background .1s, box-shadow .15s, border-color .15s;
+    }
+    .pad.hit {
+      background: var(--hot);
+      border-color: var(--hot);
+      box-shadow: 0 0 24px rgba(255, 45, 111, .6);
+      transform: scale(1.08);
+    }
+    .pad.miss {
+      border-color: #555;
+      opacity: .5;
+    }
+    .combo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: .1em;
+      color: var(--volt);
+      min-height: 1.2em;
+    }
+    .rhythm-msg {
+      color: var(--mute);
+      font-size: .85rem;
+      margin-top: .5rem;
+      min-height: 1.4em;
+    }
+
+    /* Ticket */
+    .ticket {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0;
+      margin-top: .5rem;
+      background: linear-gradient(135deg, #1a1224, #0d0a12);
+      border: 1px solid rgba(255, 255, 255, .12);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .25s, box-shadow .25s;
+    }
+    .ticket:hover {
+      transform: scale(1.01);
+      box-shadow: 0 12px 40px rgba(255, 45, 111, .2);
+    }
+    .ticket-main { padding: 1.1rem 1.2rem; }
+    .ticket-main .venue {
+      font-size: .65rem;
+      letter-spacing: .3em;
+      color: var(--volt);
+      margin-bottom: .4rem;
+    }
+    .ticket-main .artist {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.8rem, 6vw, 2.6rem);
+      letter-spacing: .06em;
+      line-height: 1;
+    }
+    .ticket-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem 1.25rem;
+      margin-top: .85rem;
+      font-size: .75rem;
+      color: var(--mute);
+    }
+    .ticket-meta strong {
+      display: block;
+      color: var(--ink);
+      font-weight: 600;
+      letter-spacing: .08em;
+      margin-bottom: .15rem;
+    }
+    .ticket-stub {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      padding: .8rem .65rem;
+      background: var(--hot);
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: .2em;
+      font-size: .95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .ticket-stub::before {
+      content: '';
+      position: absolute;
+      left: -6px; top: 50%;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--bg);
+      transform: translateY(-50%);
+    }
+    .ticket-reveal {
+      display: none;
+      margin-top: .85rem;
+      padding: 1rem;
+      border: 1px dashed rgba(255, 200, 87, .4);
+      color: var(--gold);
+      font-size: .9rem;
+      line-height: 1.55;
+      text-align: center;
+    }
+    .ticket-reveal.show { display: block; animation: fadeUp .4s ease; }
+
+    .empty-state {
+      text-align: center;
+      padding: 1.75rem 1rem;
+      border: 1px dashed rgba(255, 255, 255, .18);
+      color: var(--mute);
+      font-size: .88rem;
+      line-height: 1.65;
+    }
+    .empty-state code {
+      color: var(--volt);
+      font-size: .8rem;
+    }
+
+    /* Gallery */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .65rem;
+    }
+    @media (max-width: 560px) {
+      .photo-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .photo-card {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .1);
+      background: rgba(0, 0, 0, .35);
+      cursor: pointer;
+      padding: 0;
+      transition: transform .2s, border-color .25s, box-shadow .25s;
+    }
+    .photo-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 45, 111, .45);
+      box-shadow: 0 10px 28px rgba(255, 45, 111, .2);
+    }
+    .photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-card .cap {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: .45rem .55rem;
+      font-size: .68rem;
+      background: linear-gradient(transparent, rgba(0, 0, 0, .85));
+      color: var(--ink);
+      line-height: 1.3;
+      text-align: left;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: rgba(0, 0, 0, .88);
+      backdrop-filter: blur(8px);
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-inner {
+      position: relative;
+      max-width: min(860px, 100%);
+      max-height: 90dvh;
+      text-align: center;
+    }
+    .lightbox-inner img {
+      max-width: 100%;
+      max-height: 75dvh;
+      object-fit: contain;
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+    .lightbox-inner .lb-cap {
+      margin-top: .85rem;
+      color: var(--mute);
+      font-size: .9rem;
+      line-height: 1.5;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: -2.2rem;
+      right: 0;
+      font-size: 1.5rem;
+      color: var(--ink);
+      line-height: 1;
+      opacity: .8;
+    }
+    .lightbox-close:hover { opacity: 1; color: var(--hot); }
+
+    /* ===== Y2K / PIXEL INBOX ===== */
+    .mail-fab {
+      position: fixed;
+      right: .85rem;
+      bottom: 3.2rem;
+      z-index: 40;
+      font-family: 'Press Start 2P', monospace;
+      font-size: .52rem;
+      line-height: 1.45;
+      padding: .7rem .75rem;
+      color: #1a1030;
+      background: linear-gradient(180deg, #ffe566, #ff9f1c);
+      border: 3px solid #fff;
+      box-shadow:
+        4px 4px 0 #ff2d6f,
+        0 0 0 3px #1a1030;
+      text-align: center;
+      max-width: 7.5rem;
+      animation: mailBounce 2.4s ease-in-out infinite;
+      image-rendering: pixelated;
+    }
+    .mail-fab:hover { filter: brightness(1.08); }
+    .mail-fab .blink {
+      display: block;
+      margin-top: .35rem;
+      color: #c026d3;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes mailBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .y2k-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(0,0,0,.55) 0 2px,
+          rgba(0,0,0,.35) 2px 4px
+        ),
+        rgba(20, 8, 40, .72);
+      backdrop-filter: blur(2px);
+    }
+    .y2k-overlay.open { display: flex; }
+
+    .y2k-win {
+      width: min(440px, 100%);
+      max-height: min(92dvh, 640px);
+      display: flex;
+      flex-direction: column;
+      background: #c0c0c0;
+      border: 3px solid #fff;
+      border-right-color: #404040;
+      border-bottom-color: #404040;
+      box-shadow:
+        inset 1px 1px 0 #dfdfdf,
+        6px 6px 0 rgba(0,0,0,.45);
+      font-family: 'VT323', monospace;
+      color: #111;
+      image-rendering: pixelated;
+    }
+    .y2k-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      padding: .35rem .4rem .35rem .55rem;
+      background: linear-gradient(90deg, #000080, #1084d0);
+      color: #fff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: .48rem;
+      line-height: 1.4;
+      user-select: none;
+    }
+    .y2k-titlebar span { letter-spacing: .04em; }
+    .y2k-x {
+      width: 22px; height: 20px;
+      background: #c0c0c0;
+      color: #000;
+      border: 2px solid #fff;
+      border-right-color: #404040;
+      border-bottom-color: #404040;
+      font-family: 'Press Start 2P', monospace;
+      font-size: .55rem;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .y2k-x:hover { background: #e81123; color: #fff; }
+
+    .y2k-menubar {
+      display: flex;
+      gap: .85rem;
+      padding: .2rem .55rem;
+      font-size: 1.05rem;
+      background: #c0c0c0;
+      border-bottom: 1px solid #808080;
+      color: #222;
+    }
+    .y2k-menubar u { text-decoration-thickness: 1px; }
+
+    .y2k-body {
+      flex: 1;
+      overflow: auto;
+      margin: .45rem;
+      padding: .85rem .9rem 1rem;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255,105,180,.25), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(0,255,255,.18), transparent 26%),
+        repeating-linear-gradient(
+          45deg,
+          #fff5ff 0 8px,
+          #ffe0f7 8px 16px
+        );
+      border: 2px solid #808080;
+      border-right-color: #fff;
+      border-bottom-color: #fff;
+      min-height: 280px;
+    }
+
+    .y2k-stamp {
+      display: inline-block;
+      font-family: 'Press Start 2P', monospace;
+      font-size: .42rem;
+      padding: .35rem .45rem;
+      margin-bottom: .75rem;
+      background: #39ff14;
+      color: #111;
+      border: 2px dashed #111;
+      box-shadow: 3px 3px 0 #ff2d6f;
+      transform: rotate(-2deg);
+    }
+
+    .y2k-meta {
+      font-size: 1.15rem;
+      line-height: 1.35;
+      margin-bottom: .85rem;
+      padding-bottom: .55rem;
+      border-bottom: 2px dotted #c026d3;
+      color: #333;
+    }
+    .y2k-meta strong { color: #000080; }
+
+    .y2k-page {
+      display: none;
+      animation: y2kIn .25s steps(4);
+    }
+    .y2k-page.on { display: block; }
+    @keyframes y2kIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .y2k-page h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: .58rem;
+      line-height: 1.55;
+      color: #c026d3;
+      margin-bottom: .7rem;
+      text-shadow: 2px 2px 0 #ffe566;
+    }
+    .y2k-page p {
+      font-size: 1.28rem;
+      line-height: 1.45;
+      color: #1a1030;
+      margin-bottom: .7rem;
+    }
+    .y2k-page p:last-child { margin-bottom: 0; }
+    .y2k-page .aside {
+      margin-top: .75rem;
+      padding: .55rem .65rem;
+      background: #fff8b0;
+      border: 2px solid #111;
+      box-shadow: 3px 3px 0 #1084d0;
+      font-size: 1.15rem;
+      line-height: 1.4;
+      color: #333;
+    }
+    .y2k-hearts {
+      margin-top: .85rem;
+      font-size: 1.1rem;
+      letter-spacing: .15em;
+      color: #ff2d6f;
+      animation: blink 1.2s step-end infinite;
+    }
+
+    .y2k-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+      padding: .4rem .5rem .5rem;
+      background: #c0c0c0;
+      border-top: 1px solid #fff;
+    }
+    .y2k-pager {
+      font-family: 'Press Start 2P', monospace;
+      font-size: .42rem;
+      color: #222;
+    }
+    .y2k-btns { display: flex; gap: .35rem; }
+    .y2k-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: .45rem;
+      padding: .45rem .55rem;
+      background: #c0c0c0;
+      color: #111;
+      border: 2px solid #fff;
+      border-right-color: #404040;
+      border-bottom-color: #404040;
+      min-width: 4.2rem;
+    }
+    .y2k-btn:active {
+      border-color: #404040;
+      border-right-color: #fff;
+      border-bottom-color: #fff;
+      transform: translate(1px, 1px);
+    }
+    .y2k-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+    .y2k-btn.primary {
+      background: linear-gradient(180deg, #ff9ec8, #ff2d6f);
+      color: #fff;
+    }
+
+    .y2k-statusbar {
+      display: flex;
+      justify-content: space-between;
+      padding: .15rem .45rem;
+      font-size: .95rem;
+      background: #c0c0c0;
+      border-top: 1px solid #808080;
+      color: #333;
+    }
+
+    .pixel-toast {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      z-index: 95;
+      font-family: 'Press Start 2P', monospace;
+      font-size: .5rem;
+      line-height: 1.5;
+      padding: .7rem .9rem;
+      background: #39ff14;
+      color: #111;
+      border: 3px solid #111;
+      box-shadow: 4px 4px 0 #ff2d6f;
+      transition: transform .3s steps(4);
+      text-align: center;
+      max-width: min(90vw, 320px);
+    }
+    .pixel-toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Toast */
+    .wish-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 1.5rem;
+      transform: translateX(-50%) translateY(120%);
+      z-index: 50;
+      max-width: min(420px, calc(100% - 2rem));
+      padding: 1rem 1.25rem;
+      background: rgba(12, 8, 18, .92);
+      border: 1px solid rgba(255, 255, 255, .15);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, .5);
+      transition: transform .4s cubic-bezier(.2, .8, .2, 1);
+      text-align: center;
+    }
+    .wish-toast.show { transform: translateX(-50%) translateY(0); }
+    .wish-toast .label {
+      font-size: .6rem;
+      letter-spacing: .3em;
+      color: var(--hot);
+      margin-bottom: .35rem;
+    }
+    .wish-toast .text {
+      font-size: .95rem;
+      line-height: 1.5;
+    }
+
+    /* Finale */
+    #finale {
+      background:
+        radial-gradient(circle at 50% 40%, rgba(255, 45, 111, .25), transparent 45%),
+        radial-gradient(circle at 20% 80%, rgba(94, 240, 255, .15), transparent 40%),
+        var(--bg);
+      text-align: center;
+      z-index: 30;
+    }
+    #finale .big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 14vw, 6rem);
+      letter-spacing: .1em;
+      line-height: .95;
+      margin-bottom: 1rem;
+    }
+    #finale .msg {
+      max-width: 30rem;
+      color: var(--mute);
+      line-height: 1.7;
+      margin: 0 auto 1.75rem;
+    }
+    .confetti {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .spark {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: var(--s, var(--hot));
+      opacity: 0;
+      animation: sparkFly 2.2s ease-out forwards;
+    }
+    @keyframes sparkFly {
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity .15s;
+    }
+    .flash.on { opacity: .35; }
+
+    .egg-hint {
+      position: fixed;
+      right: .75rem;
+      bottom: .75rem;
+      font-size: .6rem;
+      letter-spacing: .15em;
+      color: rgba(255, 255, 255, .2);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .finale-btn {
+      margin-top: 1.5rem;
+      opacity: .35;
+      pointer-events: none;
+      transition: opacity .4s;
+    }
+    .finale-btn.ready {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="flash" id="flash"></div>
+  <div class="wish-toast" id="toast">
+    <div class="label">STAGE NOTE</div>
+    <div class="text" id="toastText"></div>
+  </div>
+
+  <!-- GATE: fake birthday wall —— click 宁→作→我 in order -->
+  <section class="screen active" id="gate" aria-label="Birthday wishes">
+    <div class="gate-frame">
+      <div class="gate-header">
+        <p class="g-eyebrow">A little card for you</p>
+        <h1>HAPPY BIRTHDAY</h1>
+        <p class="g-sub">把这些祝福慢慢看一遍吧</p>
+      </div>
+      <div class="gate-field" id="gateField"></div>
+      <div class="gate-footer">
+        <div class="gate-slots" id="gateSlots" aria-label="已选字">
+          <div class="gate-slot" data-i="0">·</div>
+          <div class="gate-slot" data-i="1">·</div>
+          <div class="gate-slot" data-i="2">·</div>
+        </div>
+        <p class="gate-hint">点选祝福里的字</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOT -->
+  <section class="screen" id="boot">
+    <div class="pulse"></div>
+    <div class="brand">REBECCA<br>SHOW TIME</div>
+    <p class="sub" id="bootSub"></p>
+    <div id="countdown">3</div>
+    <button class="cta primary" id="enterBtn" type="button" style="display:none">ENTER THE STAGE</button>
+    <p class="hint" id="bootHint">灯光 · 相册 · 站内信 —— 这座舞台等你接管</p>
+  </section>
+
+  <!-- STAGE -->
+  <section class="screen" id="stage">
+    <div class="fog" id="fog"></div>
+    <div class="beams" aria-hidden="true">
+      <div class="beam"></div>
+      <div class="beam"></div>
+      <div class="beam"></div>
+    </div>
+
+    <header class="topbar">
+      <div class="logo" id="logo" title=" somehow...">REBECCA<span>.</span>LIVE</div>
+      <div class="progress-wrap">
+        <span>Unlock</span>
+        <div class="dots" id="dots"></div>
+        <span id="progNum">0/6</span>
+      </div>
+    </header>
+
+    <div class="stage-inner">
+      <div class="hero-block">
+        <p class="eyebrow">Tonight's Headliner</p>
+        <h1 class="hero-title">HAPPY<br><em>BIRTHDAY</em></h1>
+        <p class="hero-line" id="heroLine"></p>
+      </div>
+
+      <nav class="nav-tabs" id="tabs">
+        <button type="button" data-tab="lights" class="on">Lights</button>
+        <button type="button" data-tab="vanity">Vanity</button>
+        <button type="button" data-tab="rhythm">Rhythm</button>
+        <button type="button" data-tab="ticket">Ticket</button>
+        <button type="button" data-tab="gallery">Gallery</button>
+        <button type="button" data-tab="inbox">Inbox</button>
+      </nav>
+
+      <div class="section on" id="sec-lights">
+        <div class="panel">
+          <h2>STAGE LIGHTS</h2>
+          <p class="desc">点亮四盏追光。每盏灯背后，都有一句送给贝贝老师的话。</p>
+          <div class="lights" id="lights"></div>
+        </div>
+      </div>
+
+      <div class="section" id="sec-vanity">
+        <div class="panel">
+          <h2>VANITY DESK</h2>
+          <p class="desc" id="vanityDesc">打开抽屉。每一样都是上场仪式。</p>
+          <div class="vanity" id="vanity"></div>
+        </div>
+      </div>
+
+      <div class="section" id="sec-rhythm">
+        <div class="panel">
+          <h2>DANCE CHECK</h2>
+          <p class="desc">跟拍 8 拍，连击 ≥5。贝贝老师的节奏感，与生俱来。</p>
+          <div class="rhythm-area">
+            <div class="combo" id="combo">COMBO 0</div>
+            <div class="beat-track" id="pads">
+              <button type="button" class="pad" data-i="0"></button>
+              <button type="button" class="pad" data-i="1"></button>
+              <button type="button" class="pad" data-i="2"></button>
+              <button type="button" class="pad" data-i="3"></button>
+            </div>
+            <button class="cta" id="startRhythm" type="button">START BEAT</button>
+            <p class="rhythm-msg" id="rhythmMsg">准备好就按 START，亮起的格子要及时点中</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="sec-ticket">
+        <div class="panel">
+          <h2>VIP PASS</h2>
+          <p class="desc">专属生日场票根。点一下翻开，看后面的话。</p>
+          <div class="ticket" id="ticket" role="button" tabindex="0">
+            <div class="ticket-main">
+              <div class="venue">FRIENDSHIP ARENA · HALL A</div>
+              <div class="artist">REBECCA</div>
+              <div class="ticket-meta">
+                <div><strong>DATE</strong> Birthday Night</div>
+                <div><strong>SEAT</strong> VIP-01</div>
+                <div><strong>SET</strong> Encore</div>
+              </div>
+            </div>
+            <div class="ticket-stub">ADMIT ONE</div>
+          </div>
+          <div class="ticket-reveal" id="ticketReveal"></div>
+        </div>
+      </div>
+
+      <div class="section" id="sec-gallery">
+        <div class="panel">
+          <h2>GALLERY</h2>
+          <p class="desc">把闪光灯留给贝贝老师。点开每一帧，都是她的主舞台。</p>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+      </div>
+
+      <div class="section" id="sec-inbox">
+        <div class="panel">
+          <h2>Y2K INBOX</h2>
+          <p class="desc">邮递员刚刚经过。点开「You've Got Mail」，看看信箱里有什么。</p>
+          <div style="text-align:center;padding:.5rem 0 .25rem">
+            <button type="button" class="cta primary" id="openInboxBtn">OPEN MAIL ★</button>
+            <p class="hint show" style="margin-top:.85rem"></p>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center">
+        <button class="cta primary finale-btn" id="finaleBtn" type="button">OPEN THE ENCORE</button>
+        <p class="hint show" id="finaleHint" style="margin-top:.75rem">解锁 6/6 后安可开放</p>
+      </div>
+    </div>
+    <p class="egg-hint">logo ×5 · backstage</p>
+  </section>
+
+  <button type="button" class="mail-fab" id="mailFab" aria-label="Open Y2K mail">
+    YOU'VE<br>GOT MAIL
+    <span class="blink">★ NEW</span>
+  </button>
+
+  <div class="pixel-toast" id="pixelToast">★ MESSAGE READ</div>
+
+  <!-- Y2K MAIL WINDOW -->
+  <div class="y2k-overlay" id="y2kOverlay" role="dialog" aria-modal="true" aria-label="Y2K Inbox">
+    <div class="y2k-win" id="y2kWin">
+      <div class="y2k-titlebar">
+        <span>✉ Hotmail Express — letter_to_rebecca.txt</span>
+        <button type="button" class="y2k-x" id="y2kClose" aria-label="Close">×</button>
+      </div>
+      <div class="y2k-menubar" aria-hidden="true">
+        <span><u>F</u>ile</span>
+        <span><u>E</u>dit</span>
+        <span><u>V</u>iew</span>
+        <span><u>H</u>elp</span>
+      </div>
+      <div class="y2k-body" id="y2kBody">
+        <!-- pages injected -->
+      </div>
+      <div class="y2k-footer">
+        <div class="y2k-pager" id="y2kPager">1 / 7</div>
+        <div class="y2k-btns">
+          <button type="button" class="y2k-btn" id="y2kPrev">◀ PREV</button>
+          <button type="button" class="y2k-btn primary" id="y2kNext">NEXT ▶</button>
+        </div>
+      </div>
+      <div class="y2k-statusbar">
+        <span>访客 #0001 · online</span>
+        <span id="y2kStatus">page 1</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo">
+    <div class="lightbox-inner">
+      <button type="button" class="lightbox-close" id="lbClose" aria-label="Close">×</button>
+      <img id="lbImg" alt="" />
+      <p class="lb-cap" id="lbCap"></p>
+    </div>
+  </div>
+
+  <!-- FINALE -->
+  <section class="screen" id="finale">
+    <div class="confetti" id="confetti"></div>
+    <p class="eyebrow">Encore</p>
+    <div class="big">STAY<br>LEGENDARY</div>
+    <p class="msg" id="finaleMsg"></p>
+    <button class="cta" id="replayBtn" type="button">REPLAY THE SHOW</button>
+  </section>
+
+  <script>
+    const CONFIG = {
+      name: 'Rebecca',
+      nicknames: ['花花', '贝贝老师', '卟哩卟哩', '贝贝卡卡'],
+      photos: [
+        { file: '1.jpg', caption: '圣诞花花突然造访' },
+        { file: '2.jpg', caption: '装袋偷走小朋友的礼物' },
+        { file: '3.jpg', caption: '闲鱼出掉世界旅行' }
+      ],
+    };
+
+    const GOALS = ['lights', 'vanity', 'rhythm', 'ticket', 'gallery', 'inbox'];
+
+    const state = {
+      unlocked: new Set(),
+      lightsLit: 0,
+      drawersOpen: 0,
+      logoClicks: 0,
+      ticketOpened: false,
+      rhythmRunning: false,
+      rhythmCombo: 0,
+      rhythmHits: 0,
+      rhythmIndex: 0,
+      rhythmTimer: null,
+    };
+
+    const wishes = {
+      light: [
+        '追光落下，愿你每一次出演都自带气场。',
+        '贝贝老师的节奏感，连灯光都要跟着走。',
+        '酷不是姿态——是你走路就带着的节拍。',
+        '演唱会散场灯光会灭；你不会。继续闪。',
+      ],
+      drawer: [
+        { icon: '💄', text: '这支口红：今天的主色调叫「自信」——贝贝老师，涂上就上场。' },
+        { icon: '👁️', text: '眼影盘打开：眼里有舞台，也有远方。' },
+        { icon: '💎', text: '耳钉叮一声：提醒你——卟哩卟哩，你值得被看见。' },
+        { icon: '✨', text: '定妆喷雾：把这一年的好运定格。妆容稳了，气场就稳了。' },
+        { icon: '🎀', text: '发夹夹好：贝贝老师，去把世界舞到服气。' },
+        { icon: '🪞', text: '小镜子里：生日快乐，花花老师。今晚你是全场焦点。' },
+      ],
+      rhythm: null, // filled with pickName()
+      ticket: null,
+      egg: null,
+      gallery: null,
+      inbox: '站内信已读完。千禧年频道接通——那些话，是认真的。',
+    };
+
+    const lightColors = ['#ff2d6f', '#5ef0ff', '#a855f7', '#ffc857'];
+    const lightTags = ['SPOT', 'STROBE', 'NEON', 'LASER'];
+
+    /* ---------- DOM ---------- */
+    const dotsEl = document.getElementById('dots');
+    const photoGridEl = document.getElementById('photoGrid');
+    const lightboxEl = document.getElementById('lightbox');
+
+    GOALS.forEach(() => {
+      const d = document.createElement('div');
+      d.className = 'dot';
+      dotsEl.appendChild(d);
+    });
+
+    // 页面人称统一固定，不再轮换
+    const CALL_NAME = '贝贝老师';
+    function pickName() {
+      return CALL_NAME;
+    }
+
+    wishes.rhythm = '8 拍过关！连击够狠——' + CALL_NAME + '，舞感这种事你早就写在骨头里了。';
+    wishes.ticket = '票根已验真：Friendship Arena · VIP-01。本场唯一主角，' + CALL_NAME + '。';
+    wishes.egg = 'Backstage unlocked：' + CALL_NAME + '——认识你真好。生日快乐。';
+    wishes.gallery = '闪光灯已开。' + CALL_NAME + ' 的每一帧，都是主舞台。';
+
+    document.getElementById('bootSub').textContent =
+      CALL_NAME + ' · birthday private concert';
+
+    document.getElementById('heroLine').innerHTML =
+      '给 <span id="heroName">' + CALL_NAME + '</span>' +
+      ' —— 最酷、最飒、聚光灯下闪亮的你。<br>这座舞台是你的，点开每一个角落。';
+
+    document.getElementById('ticketReveal').innerHTML =
+      '愿 <span id="ticketName">' + CALL_NAME + '</span> 永远站在自己的主舞台上 —— 酷、自由、闪到别人睁不开眼。<br>' +
+      '生日快乐，贝贝卡卡。今晚，你是唯一的 headliner。';
+
+    document.getElementById('finaleMsg').innerHTML =
+      '祝 花贝老师：舞步更锋利，妆容更有态度，歌单永远炸裂。<br>' +
+      '每一次出场都像 Lady Gaga 走进灯光的那一秒：世界为你安静一秒，然后欢呼。<br><br>' +
+      '生日快乐，Reeeebecca（此处有弹舌）！Stay legendary.';
+
+    const vanityDesc = document.getElementById('vanityDesc');
+    if (vanityDesc) {
+      vanityDesc.textContent =
+        '打开抽屉。每一样都是给 ' + CALL_NAME + ' 的上场仪式。';
+    }
+
+    /* ---------- UI helpers ---------- */
+    let toastTimer;
+    function showToast(text) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastText').textContent = text;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    function flash() {
+      const f = document.getElementById('flash');
+      f.classList.add('on');
+      setTimeout(() => f.classList.remove('on'), 120);
+    }
+
+    function mark(id) {
+      if (!GOALS.includes(id) || state.unlocked.has(id)) return;
+      state.unlocked.add(id);
+      const count = state.unlocked.size;
+      document.getElementById('progNum').textContent = count + '/' + GOALS.length;
+      GOALS.forEach((g, i) => {
+        dotsEl.children[i].classList.toggle('on', state.unlocked.has(g));
+      });
+
+      const btn = document.getElementById('finaleBtn');
+      const hint = document.getElementById('finaleHint');
+      if (count >= GOALS.length) {
+        btn.classList.add('ready');
+        hint.textContent = '6/6 全员解锁。可以开安可了。';
+        showToast('全部探索完成 —— ENCORE 已就绪。');
+      } else {
+        hint.textContent = '已解锁 ' + count + '/' + GOALS.length + ' · 继续探索舞台';
+      }
+    }
+
+    /* ---------- Gate (宁 → 作 → 我) ---------- */
+    const GATE_SEQ = ['宁', '作', '我'];
+    const GATE_WISHES = [
+      '生日快乐，愿你被世界温柔以待。',
+      '愿你安宁喜乐，岁岁欢愉。',
+      '今天也要闪闪发光呀。',
+      '吃好喝好，睡个好觉。',
+      '愿你所作皆成，舞台常亮。',
+      '快乐是最酷的穿搭。',
+      '新的一岁，继续做自己。',
+      '我把最好的祝福，留给今天的你。',
+      '干杯！又长大一岁啦。',
+      '愿所有期待慢慢开花。',
+    ];
+
+    let gatePicks = [];
+    let gateUnlocked = false;
+    const gateEl = document.getElementById('gate');
+    const gateField = document.getElementById('gateField');
+    const gateSlots = document.querySelectorAll('#gateSlots .gate-slot');
+
+    function wrapGateChars(text) {
+      return Array.from(text).map((ch) => {
+        if (/\s/.test(ch)) return ch;
+        const safe = ch === '"' ? '&quot;' : (ch === '<' ? '&lt;' : (ch === '>' ? '&gt;' : ch));
+        return '<span class="gate-ch" data-ch="' + safe + '">' + safe + '</span>';
+      }).join('');
+    }
+
+    GATE_WISHES.forEach((text) => {
+      const el = document.createElement('div');
+      el.className = 'gate-wish';
+      el.innerHTML = wrapGateChars(text);
+      gateField.appendChild(el);
+    });
+
+    function updateGateSlots() {
+      gateSlots.forEach((slot, i) => {
+        const ch = gatePicks[i];
+        const on = Boolean(ch);
+        slot.classList.toggle('on', on);
+        slot.textContent = on ? ch : '·';
+      });
+    }
+
+    function resetGateProgress() {
+      gatePicks = [];
+      gateField.querySelectorAll('.gate-ch.picked').forEach((k) => {
+        k.classList.remove('picked');
+      });
+      updateGateSlots();
+    }
+
+    function unlockGate() {
+      if (gateUnlocked) return;
+      gateUnlocked = true;
+      flash();
+      showToast('暗号正确 —— 真正的舞台在后面。');
+      gateEl.classList.add('unlocking');
+      setTimeout(() => {
+        gateEl.classList.remove('active');
+        document.getElementById('boot').classList.add('active');
+        startBoot();
+      }, 650);
+    }
+
+    gateField.addEventListener('click', (e) => {
+      const chEl = e.target.closest('.gate-ch');
+      if (!chEl || gateUnlocked) return;
+      if (chEl.classList.contains('picked')) return;
+      if (gatePicks.length >= GATE_SEQ.length) return;
+
+      chEl.classList.add('picked');
+      gatePicks.push(chEl.dataset.ch);
+      updateGateSlots();
+
+      if (gatePicks.length < GATE_SEQ.length) return;
+
+      const ok = gatePicks.every((c, i) => c === GATE_SEQ[i]);
+      flash();
+      if (ok) {
+        unlockGate();
+      } else {
+        showToast('好像不太对，再试一次吧。');
+        setTimeout(resetGateProgress, 450);
+      }
+    });
+
+    updateGateSlots();
+
+    /* ---------- Boot ---------- */
+    const countdownEl = document.getElementById('countdown');
+    const enterBtn = document.getElementById('enterBtn');
+    let bootStarted = false;
+
+    function startBoot() {
+      if (bootStarted) return;
+      bootStarted = true;
+      let n = 3;
+      countdownEl.textContent = '3';
+      const bootTimer = setInterval(() => {
+        n -= 1;
+        if (n > 0) {
+          countdownEl.textContent = String(n);
+          flash();
+        } else {
+          clearInterval(bootTimer);
+          countdownEl.textContent = 'GO';
+          flash();
+          enterBtn.style.display = 'inline-block';
+          document.getElementById('bootHint').classList.add('show');
+          setTimeout(() => { countdownEl.style.opacity = '.35'; }, 400);
+        }
+      }, 900);
+    }
+
+    enterBtn.addEventListener('click', () => {
+      flash();
+      document.getElementById('boot').classList.remove('active');
+      document.getElementById('stage').classList.add('active');
+      mailFab.style.display = 'block';
+      showToast('欢迎来到贝贝老师的个人演唱会。从 LIGHTS 开始。');
+    });
+
+    /* ---------- Tabs ---------- */
+    document.getElementById('tabs').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-tab]');
+      if (!btn) return;
+      document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b === btn));
+      document.querySelectorAll('.section').forEach((s) => s.classList.remove('on'));
+      document.getElementById('sec-' + btn.dataset.tab).classList.add('on');
+    });
+
+    /* ---------- Lights ---------- */
+    const lightsEl = document.getElementById('lights');
+    lightTags.forEach((tag, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'light';
+      b.style.setProperty('--c', lightColors[i]);
+      b.innerHTML = '<span class="bulb"></span><span class="tag">' + tag + '</span>';
+      b.addEventListener('click', () => {
+        if (b.classList.contains('lit')) return;
+        b.classList.add('lit');
+        state.lightsLit += 1;
+        flash();
+        showToast(wishes.light[i]);
+        if (state.lightsLit >= 4) mark('lights');
+      });
+      lightsEl.appendChild(b);
+    });
+
+    /* ---------- Vanity ---------- */
+    const vanityEl = document.getElementById('vanity');
+    wishes.drawer.forEach((item) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'drawer';
+      b.textContent = item.icon;
+      b.setAttribute('aria-label', 'Open drawer');
+      b.addEventListener('click', () => {
+        if (!b.classList.contains('open')) {
+          b.classList.add('open');
+          state.drawersOpen += 1;
+          if (state.drawersOpen >= 3) mark('vanity');
+        }
+        flash();
+        showToast(item.text);
+      });
+      vanityEl.appendChild(b);
+    });
+
+    /* ---------- Rhythm ---------- */
+    const pads = Array.from(document.querySelectorAll('#pads .pad'));
+    const comboEl = document.getElementById('combo');
+    const rhythmMsg = document.getElementById('rhythmMsg');
+
+    function clearPads() {
+      pads.forEach((p) => p.classList.remove('hit', 'miss'));
+    }
+
+    function stopRhythm() {
+      clearTimeout(state.rhythmTimer);
+      state.rhythmRunning = false;
+      clearPads();
+    }
+
+    function nextBeat() {
+      if (!state.rhythmRunning) return;
+      if (state.rhythmHits >= 8) {
+        stopRhythm();
+        if (state.rhythmCombo >= 5) {
+          rhythmMsg.textContent = '过关！连击 ' + state.rhythmCombo;
+          flash();
+          showToast(wishes.rhythm);
+          mark('rhythm');
+        } else {
+          rhythmMsg.textContent = '差一点点。再来一轮，连击要 ≥5';
+          showToast('节奏差一点。贝贝老师，再压一拍。');
+        }
+        return;
+      }
+
+      clearPads();
+      const target = Math.floor(Math.random() * 4);
+      pads[target].classList.add('hit');
+      state.rhythmIndex = target;
+
+      state.rhythmTimer = setTimeout(() => {
+        if (!state.rhythmRunning) return;
+        if (pads[target].classList.contains('hit')) {
+          pads[target].classList.remove('hit');
+          pads[target].classList.add('miss');
+          state.rhythmCombo = 0;
+          comboEl.textContent = 'COMBO 0';
+        }
+        state.rhythmHits += 1;
+        state.rhythmTimer = setTimeout(nextBeat, 220);
+      }, 700);
+    }
+
+    document.getElementById('startRhythm').addEventListener('click', () => {
+      stopRhythm();
+      state.rhythmRunning = true;
+      state.rhythmCombo = 0;
+      state.rhythmHits = 0;
+      comboEl.textContent = 'COMBO 0';
+      rhythmMsg.textContent = '跟拍！亮起就点';
+      nextBeat();
+    });
+
+    pads.forEach((pad) => {
+      pad.addEventListener('click', () => {
+        if (!state.rhythmRunning) return;
+        const i = Number(pad.dataset.i);
+        if (pad.classList.contains('hit') && i === state.rhythmIndex) {
+          pad.classList.remove('hit');
+          state.rhythmCombo += 1;
+          comboEl.textContent = 'COMBO ' + state.rhythmCombo;
+          clearTimeout(state.rhythmTimer);
+          state.rhythmHits += 1;
+          state.rhythmTimer = setTimeout(nextBeat, 180);
+        } else {
+          state.rhythmCombo = 0;
+          comboEl.textContent = 'COMBO 0';
+          pad.classList.add('miss');
+          setTimeout(() => pad.classList.remove('miss'), 200);
+        }
+      });
+    });
+
+    /* ---------- Ticket ---------- */
+    function openTicket() {
+      if (!state.ticketOpened) {
+        state.ticketOpened = true;
+        document.getElementById('ticketReveal').classList.add('show');
+        flash();
+        showToast(wishes.ticket);
+        mark('ticket');
+      }
+    }
+    document.getElementById('ticket').addEventListener('click', openTicket);
+    document.getElementById('ticket').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openTicket();
+      }
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /* ---------- Gallery ---------- */
+    function renderGallery() {
+      photoGridEl.innerHTML = '';
+      if (!CONFIG.photos.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML =
+          '相册还空着。<br>把照片放进 <code>media/photos/</code>，<br>再在 CONFIG.photos 里列出文件名。<br><br>贝贝老师的闪光灯，等你按下。';
+        photoGridEl.appendChild(empty);
+        return;
+      }
+
+      CONFIG.photos.forEach((photo, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'photo-card';
+        const src = 'media/photos/' + photo.file;
+        const cap = photo.caption || '贝贝老师 · live';
+        btn.innerHTML =
+          '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(cap) + '" loading="lazy" />' +
+          '<span class="cap">' + escapeHtml(cap) + '</span>';
+        btn.addEventListener('click', () => openLightbox(src, cap));
+        photoGridEl.appendChild(btn);
+      });
+    }
+
+    function openLightbox(src, cap) {
+      document.getElementById('lbImg').src = src;
+      document.getElementById('lbImg').alt = cap;
+      document.getElementById('lbCap').textContent = cap;
+      lightboxEl.classList.add('open');
+      flash();
+      const firstUnlock = !state.unlocked.has('gallery');
+      if (firstUnlock) showToast(wishes.gallery);
+      mark('gallery');
+    }
+
+    function closeLightbox() {
+      lightboxEl.classList.remove('open');
+      document.getElementById('lbImg').src = '';
+    }
+
+    document.getElementById('lbClose').addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeLightbox();
+    });
+    lightboxEl.addEventListener('click', (e) => {
+      if (e.target === lightboxEl) closeLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (y2kOverlay.classList.contains('open')) closeY2K();
+      else if (lightboxEl.classList.contains('open')) closeLightbox();
+    });
+
+    renderGallery();
+
+    /* ---------- Y2K Inbox (personal letter) ---------- */
+    const LETTER_PAGES = [
+      {
+        title: '★ YOU\'VE GOT MAIL',
+        html:
+          '<div class="y2k-stamp">NEW MSG · 2000s</div>' +
+          '<div class="y2k-meta">' +
+          '<div><strong>From:</strong> 迪士尼在逃饼饼</div>' +
+          '<div><strong>To:</strong> 贝贝老师</div>' +
+          '<div><strong>Subject:</strong> 真是令人不由得感慨时光荏苒 岁月如梭啊</div>' +
+          '</div>' +
+          '<p>点 NEXT 往后翻。这不是舞台台词，是一封手写站内信。</p>' +
+          '<div class="y2k-hearts">★ ★ ★ ★ ★</div>',
+      },
+      {
+        title: '01 · 舞台上的你',
+        html:
+          '<p>俺没什么才艺，其实很羡慕卟哩这样能够在舞台上发光的人。</p>' +
+          '<p>不管是唱歌、跳舞，还是吉他（我记得是会的）——在你身上，能看到我对自己的期望。</p>',
+      },
+      {
+        title: '02 · HK这一年',
+        html:
+          '<p>港硕的一年，身边有一群人，不管来自哪里、什么背景，总是在努力生活，去追求自己喜爱的事物，也激励我去做想做的事。</p>',
+      },
+      {
+        title: '03 · 一点碎碎念',
+        html:
+          '<p>btw 大家会的都好多呀……我仅会的那一点点，好像已经全部被 AI 取代了（泪）。</p>' +
+          '<div class="aside">如果回到 2018，手搓网页的成就感以及带来的惊喜感，跟现在一定大不一样（思考状）。</div>',
+      },
+      {
+        title: '04 · 谢谢你在',
+        html:
+          '<p>也谢谢哩嘎在宣传部过去一年，能够在线下陪伴大家（俺实在是不称职了）。</p>' +
+          '<p>每次看到你在空间发的生活记录，都感觉很有活力，很有生命，很有精神！</p>',
+      },
+      {
+        title: '05 · 生日快乐',
+        html:
+          '<p>所以——继续发光吧。舞台是你的，生活也是。</p>' +
+          '<p>生日快乐，芮埠嚟尕！</p>' +
+          '<div class="aside">★ end of message ★<br>访客留言本已盖章 · please keep shining</div>' +
+          '<div class="y2k-hearts">★ HAPPY BIRTHDAY ★</div>',
+      },
+    ];
+
+    let letterPage = 0;
+    let letterMaxSeen = 0;
+    const y2kOverlay = document.getElementById('y2kOverlay');
+    const y2kBody = document.getElementById('y2kBody');
+    const mailFab = document.getElementById('mailFab');
+
+    function renderLetterPages() {
+      y2kBody.innerHTML = LETTER_PAGES.map((p, i) =>
+        '<div class="y2k-page' + (i === 0 ? ' on' : '') + '" data-page="' + i + '">' +
+        '<h3>' + p.title + '</h3>' + p.html +
+        '</div>'
+      ).join('');
+    }
+
+    function showLetterPage(i) {
+      letterPage = Math.max(0, Math.min(LETTER_PAGES.length - 1, i));
+      letterMaxSeen = Math.max(letterMaxSeen, letterPage);
+      y2kBody.querySelectorAll('.y2k-page').forEach((el, idx) => {
+        el.classList.toggle('on', idx === letterPage);
+      });
+      document.getElementById('y2kPager').textContent =
+        (letterPage + 1) + ' / ' + LETTER_PAGES.length;
+      document.getElementById('y2kStatus').textContent = 'page ' + (letterPage + 1);
+      document.getElementById('y2kPrev').disabled = letterPage === 0;
+      const nextBtn = document.getElementById('y2kNext');
+      if (letterPage >= LETTER_PAGES.length - 1) {
+        nextBtn.textContent = '★ DONE';
+      } else {
+        nextBtn.textContent = 'NEXT ▶';
+      }
+      if (letterMaxSeen >= LETTER_PAGES.length - 1) {
+        unlockInbox();
+      }
+    }
+
+    let inboxUnlocked = false;
+    function unlockInbox() {
+      if (inboxUnlocked) return;
+      inboxUnlocked = true;
+      mark('inbox');
+      showToast(wishes.inbox);
+      showPixelToast('★ LETTER COMPLETE');
+      const blink = mailFab.querySelector('.blink');
+      if (blink) blink.textContent = '★ READ';
+    }
+
+    let pixelToastTimer;
+    function showPixelToast(text) {
+      const el = document.getElementById('pixelToast');
+      el.textContent = text;
+      el.classList.add('show');
+      clearTimeout(pixelToastTimer);
+      pixelToastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function openY2K() {
+      y2kOverlay.classList.add('open');
+      showLetterPage(letterPage);
+      showPixelToast('★ YOU\'VE GOT MAIL');
+    }
+
+    function closeY2K() {
+      y2kOverlay.classList.remove('open');
+    }
+
+    renderLetterPages();
+
+    mailFab.style.display = 'none';
+    document.getElementById('openInboxBtn').addEventListener('click', openY2K);
+    mailFab.addEventListener('click', openY2K);
+    document.getElementById('y2kClose').addEventListener('click', closeY2K);
+    y2kOverlay.addEventListener('click', (e) => {
+      if (e.target === y2kOverlay) closeY2K();
+    });
+    document.getElementById('y2kPrev').addEventListener('click', () => showLetterPage(letterPage - 1));
+    document.getElementById('y2kNext').addEventListener('click', () => {
+      if (letterPage >= LETTER_PAGES.length - 1) {
+        unlockInbox();
+        closeY2K();
+        return;
+      }
+      showLetterPage(letterPage + 1);
+    });
+
+    /* ---------- Logo easter egg (NOT a finale goal) ---------- */
+    document.getElementById('logo').addEventListener('click', () => {
+      state.logoClicks += 1;
+      if (state.logoClicks === 5) {
+        flash();
+        showToast(wishes.egg);
+        state.logoClicks = 0;
+      }
+    });
+
+    /* ---------- Finale ---------- */
+    function burstSparks() {
+      const box = document.getElementById('confetti');
+      box.innerHTML = '';
+      const colors = ['#ff2d6f', '#5ef0ff', '#a855f7', '#ffc857', '#fff'];
+      for (let i = 0; i < 48; i++) {
+        const s = document.createElement('div');
+        s.className = 'spark';
+        const angle = (Math.PI * 2 * i) / 48 + Math.random() * 0.4;
+        const dist = 80 + Math.random() * 220;
+        s.style.left = '50%';
+        s.style.top = '42%';
+        s.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        s.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        s.style.setProperty('--s', colors[i % colors.length]);
+        s.style.animationDelay = (Math.random() * 0.25) + 's';
+        box.appendChild(s);
+      }
+    }
+
+    document.getElementById('finaleBtn').addEventListener('click', () => {
+      if (state.unlocked.size < GOALS.length) return;
+      flash();
+      mailFab.style.display = 'none';
+      closeY2K();
+      document.getElementById('stage').classList.remove('active');
+      document.getElementById('finale').classList.add('active');
+      burstSparks();
+    });
+
+    document.getElementById('replayBtn').addEventListener('click', () => {
+      location.reload();
+    });
+  </script>
+</body>
+</html>
